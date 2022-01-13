@@ -23,10 +23,12 @@ RegisterServerEvent("InchallahGarage:StockVehicleInGarage")
 AddEventHandler("InchallahGarage:StockVehicleInGarage", function(vData, vPlate, veh)
     local source = source
     local xPlayer = ESX.GetPlayerFromId(source)
+    local Found = false
     MySQL.Async.fetchAll('SELECT * FROM owned_vehicles', {
     }, function(data)
         for k,v in pairs(data) do
             if v.plate == vPlate then
+                Found = true
                 if xPlayer.identifier == v.owner then
                     MySQL.Async.fetchAll("UPDATE owned_vehicles SET state =@state WHERE plate=@plate",{['@state'] = true , ['@plate'] = vPlate})
                     MySQL.Async.fetchAll("UPDATE owned_vehicles SET vehicle =@vehicle WHERE plate=@plate",{['@vehicle'] = vData , ['@plate'] = vPlate})
@@ -34,9 +36,10 @@ AddEventHandler("InchallahGarage:StockVehicleInGarage", function(vData, vPlate, 
                 else
                     TriggerClientEvent('esx:showNotification', source, "~r~Ceci n'est pas votre Véhicule")
                 end
-            else
-                TriggerClientEvent('esx:showNotification', source, "~r~Vous ne pouvez pas rentrer ce Véhciule")
             end
+        end
+        if not Found then
+            TriggerClientEvent('esx:showNotification', source, "~r~Vous ne pouvez pas rentrer ce Véhicule")
         end
     end) 
 end)
